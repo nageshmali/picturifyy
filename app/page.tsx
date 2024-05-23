@@ -8,7 +8,7 @@ import Navbar from "@/components/Navbar";
 import RightSidebar from "@/components/RightSidebar";
 import { ActiveElement, Attributes, CustomFabricObject } from "@/types/type";
 import { useEffect, useRef, useState } from "react";
-import { handleCanvasMouseDown, handleCanvasMouseUp, handleCanvasObjectModified, handleCanvasObjectScaling, handleCanvasSelectionCreated, handleCanvaseMouseMove, handleResize, initializeFabric, renderCanvas } from "@/lib/canvas";
+import { handleCanvasMouseDown, handleCanvasMouseUp, handleCanvasObjectModified, handleCanvasObjectScaling, handleCanvasSelectionCreated, handleCanvaseMouseMove, handlePathCreated, handleResize, initializeFabric, renderCanvas } from "@/lib/canvas";
 import { useMutation, useRedo, useStorage, useUndo } from "@/liveblocks.config";
 import { defaultNavElement } from "@/constants";
 import { handleDelete, handleKeyDown } from "@/lib/key-events";
@@ -22,7 +22,7 @@ export default function Page() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<fabric.Canvas | null>(null);
   const isDrawing = useRef(false);
-  const shapeRef = useRef<fabric.Objectt | null>(null);
+  const shapeRef = useRef<fabric.Object | null>(null);
   const selectedShapeRef = useRef<string | null>(null);
   const activeObjectRef = useRef<fabric.Object | null>(null);
   const imageInputRef = useRef<HTMLImageElement>(null);
@@ -165,6 +165,12 @@ export default function Page() {
       })
     })
 
+    canvas.on("path:created", (options:any) => {
+      handlePathCreated({
+        options, syncShapeInStorage
+      })
+    })
+
     window.addEventListener("resize", () => {
       handleResize({ fabricRef })
     })
@@ -212,7 +218,7 @@ export default function Page() {
 
         <section className="flex h-full flex-row">
           <LeftSidebar allShapes={Array.from(canvasObjects)}/>
-          <Live canvasRef={canvasRef}/>
+          <Live canvasRef={canvasRef} undo={undo} redo={redo}/>
           <RightSidebar
             elementAttributes={elementAttributes}
             setElementAttributes={setElementAttributes}
